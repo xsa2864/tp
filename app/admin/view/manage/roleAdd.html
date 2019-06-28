@@ -1,0 +1,123 @@
+{extend name="base/base" /}
+{block name="title"}{$title}{/block}
+{block name="content"}
+<article class="cl pd-20">
+	<form class="form form-horizontal" id="form-admin-role-add">
+		<div class="row cl">
+			<label class="form-label col-xs-3 col-sm-3"><span class="c-red">*</span>角色名称：</label>
+			<div class="formControls col-xs-8 col-sm-8">
+				<input type="text" class="input-text" value="{$roler.title}" id="title" name="title" datatype="*4-16" nullmsg="角色名称不能为空">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-3 col-sm-3">状 态：</label>
+			<div class="formControls col-xs-8 col-sm-8 skin-minimal">
+				<div class="radio-box">
+					<input name="status" type="radio" id="sex-1" checked value="1">
+					<label for="sex-1">已启用</label>
+				</div>
+				<div class="radio-box">
+					<input type="radio" id="sex-2" name="status" {if $roler.status==0}checked{/if} value="0">
+					<label for="sex-2">已停用</label>
+				</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-3 col-sm-3">备注：</label>
+			<div class="formControls col-xs-8 col-sm-8">
+				<input type="text" class="input-text" value="{$roler.note}" id="note" name="note">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-3 col-sm-3">网站角色：</label>
+			<div class="formControls col-xs-8 col-sm-8">
+				{volist name="listmenu" id="vo"}
+				<dl class="permission-list">
+					<dt>
+						<label>
+							<input type="checkbox" value="{$vo.id}" name="rules[]" id="user-Character-{$vo.id}" {if $vo.checked==1}checked{/if}>
+							{$vo.title}</label>
+					</dt>
+					{volist name="$vo.child" id="ch"}
+					<dd>
+						<dl class="cl permission-list2">
+							<dt>
+								<label class="">
+									<input type="checkbox" value="{$ch.id}" name="rules[]" id="user-Character-{$vo.id}-{$ch.id}" {if $ch.checked==1}checked{/if}>
+									{$ch.title}</label>
+							</dt>
+							<dd>
+								{volist name="$ch.child" id="chi"}
+								<label class="">
+									<input type="checkbox" value="{$chi.id}" name="rules[]" id="user-Character-{$vo.id}-{$ch.id}-{$chi.id}" {if $chi.checked==1}checked{/if}>
+									{$chi.title}</label>
+								{/volist}
+							</dd>
+						</dl>
+					</dd>
+					{/volist}
+				</dl>
+				{/volist}
+			</div>
+		</div>
+		<div class="row cl">
+			<input type="hidden" name="id" value="{$roler.id}">
+			<div class="col-xs-8 col-sm-8 col-xs-offset-4 col-sm-offset-3">
+				<button type="submit" class="btn btn-success radius" id="admin-role-save" name="admin-role-save"><i class="icon-ok"></i> 确定</button>
+			</div>
+		</div>
+	</form>
+</article>
+{/block}
+
+{block name="js"}
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/jquery.validate.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/validate-methods.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/messages_zh.js"></script> 
+<script type="text/javascript">
+$(function(){
+	$(".permission-list dt input:checkbox").click(function(){
+		$(this).closest("dl").find("dd input:checkbox").prop("checked",$(this).prop("checked"));
+	});
+	$(".permission-list2 dd input:checkbox").click(function(){
+		var l =$(this).parent().parent().find("input:checked").length;
+		var l2=$(this).parents(".permission-list").find(".permission-list2 dd").find("input:checked").length;
+		if($(this).prop("checked")){
+			$(this).closest("dl").find("dt input:checkbox").prop("checked",true);
+			$(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",true);
+		}
+		else{
+			if(l==0){
+				$(this).closest("dl").find("dt input:checkbox").prop("checked",false);
+			}
+			if(l2==0){
+				$(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked",false);
+			}
+		}
+	});
+	
+	$("#form-admin-role-add").validate({
+		rules:{
+			title:{
+				required:true,
+			},
+		},
+		onkeyup:false,
+		focusCleanup:true,
+		success:"valid",
+		submitHandler:function(form){
+			$.post("{:url('manage/roleSave')}",
+				$("form").serialize(),
+				function(data){
+					alert(data.msg);
+					if(data.success==1){
+						var index = parent.layer.getFrameIndex(window.name);
+						parent.$('.btn-refresh').click();
+						parent.layer.close(index);
+					}
+				},'json')
+		}
+	});
+});
+</script>
+{/block}

@@ -1,0 +1,79 @@
+{extend name="base/base" /}
+{block name="title"}{$title}{/block}
+{block name="content"}
+<article class="page-container">
+	<form class="form form-horizontal" id="form-change-password">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">账 &nbsp; 户：</label>
+			<div class="formControls col-xs-8 col-sm-9"> {$user.user_name} </div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>新密码：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="password" class="input-text" autocomplete="off" placeholder="不修改请留空" name="newpassword" id="newpassword">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>确认密码：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="password" class="input-text" autocomplete="off" placeholder="不修改请留空" name="newpassword2" id="new-password2">
+			</div>
+		</div>
+		<div class="row cl">
+			<input type="hidden" name="uid" value="{$user.uid}">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;保存&nbsp;&nbsp;">
+			</div>
+		</div>
+	</form>
+</article>
+{/block}
+{block name="js"}
+<script type="text/javascript" src="__HUI__/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/jquery.validate.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/validate-methods.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$('.skin-minimal,.skin-status input').iCheck({
+		checkboxClass: 'icheckbox-blue',
+		radioClass: 'iradio-blue',
+		increaseArea: '20%'
+	});
+	
+	//表单验证
+	$("#form-change-password").validate({
+		rules:{
+			newpassword:{
+				required:true,
+				minlength:6,
+				maxlength:16
+			},
+			newpassword2:{
+				required:true,
+				minlength:6,
+				maxlength:16,
+				equalTo: "#newpassword"
+			},
+		},
+		onkeyup:false,
+		focusCleanup:false,
+		success:"valid",
+		submitHandler:function(form){			
+			$.post('{:url("user/passwordSave")}',
+				$("#form-change-password").serialize(),
+				function(data){
+		            if(data.success>0){
+		                var index = parent.layer.getFrameIndex(window.name);
+		                parent.$('.btn-refresh')[0].click();
+						parent.layer.close(index);
+		            }
+		            layer.msg(data.msg,{icon:1,time:1000});
+				},'json')
+		}
+	});	
+});
+
+</script>
+{/block}

@@ -1,0 +1,152 @@
+{extend name="base/base" /}
+{block name="title"}{$title}{/block}
+{block name="content"}
+<article class="page-container">
+	<form class="form form-horizontal" id="form-article-add">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>广告位标题：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="hidden" name="id" value="{$list.id}">
+				<input type="text" class="input-text" value="{$list.title}" id="title" name="title">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>广告位类型：</label>
+			<div class="formControls col-xs-8 col-sm-9"> <span class="select-box">
+				<select name="type_id" class="select">
+					<option value="0">全部类型</option>
+					{volist name="cate" id="vo"}
+					<option value="{$vo.id}" {if $vo.id==$list.type_id}selected{/if}>{$vo.title}</option>
+					{/volist}
+				</select>
+				</span> 
+			</div>
+		</div>
+
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">是否发布：</label>
+			<div class="formControls col-xs-8 col-sm-9 skin-minimal">
+				<div class="check-box">
+					<input type="checkbox" id="status" name="status" {if $list.status==1}checked="true"{/if} value="1">
+					<label for="checkbox-pinglun">&nbsp;</label>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">上传图片：</label>
+			<div class="formControls col-xs-8 col-sm-9">				
+                <button type="button" class="layui-btn" id="imgupload">
+                  <i class="layui-icon">&#xe67c;</i>上传图片
+                </button>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">广告图文：</label>
+		</div>
+		<div class="row cl" id="list_attr">
+		{notempty name="list_attr"}
+			{volist name="list_attr" id="vo"}
+			<div class="formControls col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+				<img src="{$vo.img}" id="show_img" height=100 width=100>
+                <input type="hidden" name="img[]" value="{$vo.img}">
+                <input type="text" name="name[]" placeholder="名称" style="width:150px" class="input-text" value="{$vo.name}">
+				<input type="text" name="url[]" class="input-text" placeholder="跳转链接" style="width:250px" value="{$vo.url}">
+				<a href="javascript:;" onclick="removeImg(this)">移除</a>
+			</div>
+			{/volist}
+		{/notempty}
+		</div>
+
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">				
+				<button class="btn btn-secondary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</article>
+<style type="text/css">
+#list_attr>.formControls{
+	margin-bottom: 2px;
+}
+</style>
+{/block}
+{block name="js"}
+<script type="text/javascript" src="__HUI__/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/jquery.validate.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/validate-methods.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript">
+$(function(){
+	$('.skin-minimal input').iCheck({
+		checkboxClass: 'icheckbox-blue',
+		radioClass: 'iradio-blue',
+		increaseArea: '20%'
+	});
+	
+	//表单验证
+	$("#form-article-add").validate({
+		rules:{
+			title:{
+				required:true,
+			},
+		},
+		onkeyup:false,
+		focusCleanup:false,
+		success:"valid",
+		submitHandler:function(form){
+			var type_id = $("select[name=type_id]").val();
+			if(type_id==''||type_id==null){
+				alert("广告位类型!");return false;
+			}
+			$.post('{:url("ads/adsSave")}',
+				$("#form-article-add").serialize(),
+				function(data){
+		            if(data.success>0){
+		                var index = parent.layer.getFrameIndex(window.name);
+		                parent.$('.btn-refresh')[0].click();
+						parent.layer.close(index);
+		            }
+		            alert(data.msg)
+				},'json')
+		}
+	});
+
+});
+// 移除图片
+function removeImg(e){
+	$(e).parent().remove();
+}
+// 上传头像
+layui.use('upload', function(){
+    var upload = layui.upload;     
+    //执行实例
+    var uploadInst = upload.render({
+        elem: '#imgupload' //绑定元素
+        ,url: '{:url("Common/upload")}' //上传接口
+        ,data: {'width':250,'height':250}
+        ,accept: 'images'
+        ,acceptMime:  'image/*'
+        ,done: function(res){
+            //上传完毕回调
+            if(res.success==1){  
+            	var html = '';
+                html += '<div class="formControls col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">';
+				html += ' <img src="'+res.msg+'" id="show_img" height=100 width=100> ';
+	            html += ' <input type="hidden" name="img[]" value="'+res.msg+'"> ';
+	            html += ' <input type="text" name="name[]" placeholder="名称" style="width:150px" class="input-text"> ';
+				html += ' <input type="text" name="url[]" class="input-text" placeholder="跳转链接" style="width:250px"> ';
+				html += ' <a href="javascript:;" onclick="removeImg(this)">移除</a> ';
+				html += '</div>';
+				$("#list_attr").append(html);
+            }
+        }
+        ,error: function(){
+          //请求异常回调
+        }
+    });
+});
+
+</script>
+{/block}

@@ -1,0 +1,116 @@
+{extend name="base/base" /}
+{block name="title"}{$title}{/block}
+{block name="content"}
+<article class="cl pd-20">
+	<form class="form form-horizontal" id="form-admin-add">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>用户名：</label>
+			<div class="formControls col-xs-8 col-sm-7">
+				<input type="text" class="input-text" value="{$list.user_name}" placeholder="用户名" id="user_name" name="user_name">
+			</div>
+		</div>
+		
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机号：</label>
+			<div class="formControls col-xs-8 col-sm-7">
+				<input type="text" class="input-text" value="{$list.mobile}" placeholder="手机号" id="mobile" name="mobile">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>邮 箱：</label>
+			<div class="formControls col-xs-8 col-sm-7">
+				<input type="text" class="input-text" placeholder="邮箱" name="email" id="email" value="{$list.email}">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">状 态：</label>
+			<div class="formControls col-xs-8 col-sm-7 skin-minimal">
+				<div class="radio-box">
+					<input name="status" type="radio" id="sex-1" checked value="1">
+					<label for="sex-1">已启用</label>
+				</div>
+				<div class="radio-box">
+					<input type="radio" id="sex-2" name="status" {if $list.status==0}checked{/if} value="0">
+					<label for="sex-2">已停用</label>
+				</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">角 色：</label>
+			<div class="formControls col-xs-8 col-sm-7"> 
+				<span class="select-box">
+				<select class="select" name="group_id" size="1">
+					<option value="0">请选择角色</option>
+					{volist name="roler" id="ro"}
+					<option value="{$ro.id}" {if $ro.id==$gid}selected{/if}>{$ro.title}</option>
+					{/volist}
+				</select>
+				</span> 
+			</div>
+		</div>
+		<div class="row cl">
+			<input type="hidden" name="mid" value="{$list.mid}">
+			<div class="col-xs-8 col-sm-7 col-xs-offset-4 col-sm-offset-3">
+				<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+			</div>
+		</div>
+	</form>
+</article>
+{/block}
+{block name="js"}
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/jquery.validate.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/validate-methods.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/messages_zh.js"></script> 
+<script type="text/javascript">
+$(function(){
+	$('.skin-minimal input').iCheck({
+		checkboxClass: 'icheckbox-blue',
+		radioClass: 'iradio-blue',
+		increaseArea: '20%'
+	});
+	
+	$("#form-admin-add").validate({
+		rules:{
+			user_name:{
+				required:true,
+				minlength:4,
+				maxlength:16
+			},
+			password:{
+				required:true,
+			},
+			password2:{
+				required:true,
+				equalTo: "#password"
+			},
+			mobile:{
+				required:true,
+				isPhone:true,
+			},
+			email:{
+				required:true,
+				email:true,
+			},
+			adminRole:{
+				required:true,
+			},
+		},
+		onkeyup:false,
+		focusCleanup:true,
+		success:"valid",
+		submitHandler:function(form){			
+			$.post("{:url('manage/manageSave')}",
+				$("form").serialize(),
+				function(data){
+					alert(data.msg);
+					if(data.success==1){
+						var index = parent.layer.getFrameIndex(window.name);
+						parent.$('.btn-refresh')[0].click();
+						parent.layer.close(index);
+					}
+				},'json')
+		}
+	});
+});
+</script>
+{/block}

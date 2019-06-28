@@ -1,0 +1,118 @@
+{extend name="base/base" /}
+{block name="title"}{$title}{/block}
+{block name="content"}
+<article class="page-container">
+	<form class="form form-horizontal" id="form-article-add">
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>用户名：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="hidden" name="id" value="{$list.uid}">
+				<input type="text" class="input-text" value="{$list.user_name}" id="user_name" name="user_name">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">性 &nbsp; 别：</label>
+			<div class="formControls col-xs-8 col-sm-9 skin-minimal">
+				<div class="radio-box">
+					<input name="sex" type="radio" id="sex-1" checked value="1">
+					<label for="sex-1">男</label>
+				</div>
+				<div class="radio-box">
+					<input type="radio" id="sex-2" name="sex" {if $list.sex==2}checked{/if} value="2">
+					<label for="sex-2">女</label>
+				</div>
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">昵 &nbsp; 称：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$list.nick_name}" id="nick_name" name="nick_name">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">E-mail：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$list.email}" id="email" name="email">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">手机号：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$list.mobile}" id="mobile" name="mobile">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">身份证号：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$list.id_card}" id="id_card" name="id_card">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">openid：</label>
+			<div class="formControls col-xs-8 col-sm-9">
+				<input type="text" class="input-text" value="{$list.openid}" id="openid" name="openid">
+			</div>
+		</div>
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-2">状 &nbsp; 态：</label>
+			<div class="formControls col-xs-8 col-sm-9 skin-status">
+				<div class="radio-box">
+					<input name="status" type="radio" id="status-1" checked value="1">
+					<label for="status-1">正常</label>
+				</div>
+				<div class="radio-box">
+					<input type="radio" id="status-2" name="status" {if $list.status==0}checked{/if} value="0">
+					<label for="status-2">黑名单</label>
+				</div>
+			</div>
+		</div>		
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">				
+				<button class="btn btn-secondary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+				<button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+			</div>
+		</div>
+	</form>
+</article>
+{/block}
+{block name="js"}
+<script type="text/javascript" src="__HUI__/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/jquery.validate.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/validate-methods.js"></script> 
+<script type="text/javascript" src="__HUI__/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$('.skin-minimal,.skin-status input').iCheck({
+		checkboxClass: 'icheckbox-blue',
+		radioClass: 'iradio-blue',
+		increaseArea: '20%'
+	});
+	
+	//表单验证
+	$("#form-article-add").validate({
+		rules:{
+			user_name:{
+				required:true,
+			},
+		},
+		onkeyup:false,
+		focusCleanup:false,
+		success:"valid",
+		submitHandler:function(form){			
+			$.post('{:url("user/userSave")}',
+				$("#form-article-add").serialize(),
+				function(data){
+		            if(data.success>0){
+		                var index = parent.layer.getFrameIndex(window.name);
+		                parent.$('.btn-refresh')[0].click();
+						parent.layer.close(index);
+		            }
+		            layer.msg(data.msg,{icon:1,time:1000});
+				},'json')
+		}
+	});	
+});
+
+</script>
+{/block}

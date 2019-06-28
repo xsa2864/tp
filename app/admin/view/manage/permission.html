@@ -1,0 +1,113 @@
+{extend name="base/base" /}
+{block name="title"}{$title}{/block}
+{block name="content"}
+<nav class="breadcrumb">
+<i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 管理员管理 <span class="c-gray en">&gt;</span> 权限管理 
+<a class="btn btn-success radius r btn-refresh" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a>
+</nav>
+<div class="page-container">
+	<div class="cl pd-5 bg-1 bk-gray mt-10"> 
+	<span class="l"><a href="javascript:;" onclick="admin_permission_add('添加权限节点','{:url("manage/permissionAdd")}','','510')" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe600;</i> 添加权限节点</a></span> 
+	</div>
+	<table class="table table-border table-bordered table-bg">
+		<thead>
+			<tr>
+				<th scope="col" colspan="7">权限节点</th>
+			</tr>
+			<tr class="text-c">
+				<th width="40">ID</th>
+				<th width="200">权限名称</th>
+				<th>字段名</th>
+				<th width="200">状态</th>
+				<th width="200">显示菜单</th>
+				<th width="100">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+		{volist name="list" id="vo"}
+			<tr class="text-c">
+				<td>{$vo.id}</td>
+				<td class="text-l"><h3>{$vo.title}</h3></td>
+				<td class="text-l">{$vo.name}</td>
+				<td>{$vo.status==1?"开启":"关闭"}</td>
+				<td>{$vo.ismenu==1?"显示":"不显示"}</td>
+				<td>
+				<a title="编辑" href="javascript:;" onclick="admin_permission_edit('权限编辑','{:url("manage/permissionAdd",array("id"=>$vo.id))}','1','','500')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6df;</i></a> 
+				<a title="删除" href="javascript:;" onclick="admin_permission_del(this,'{$vo.id}')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>
+				</td>
+			</tr>
+			{volist name="vo.child" id="ch"}
+				<tr class="text-c">
+					<td>{$ch.id}</td>
+					<td class="text-l"><b>&nbsp;|-- {$ch.title}</b></td>
+					<td class="text-l">{$ch.name}</td>
+					<td>{$ch.status==1?"开启":"关闭"}</td>
+					<td>{$ch.ismenu==1?"显示":"不显示"}</td>
+					<td>
+					<a title="编辑" href="javascript:;" onclick="admin_permission_edit('权限编辑','{:url("manage/permissionAdd",array("id"=>$ch.id))}','1','','500')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6df;</i></a> 
+					<a title="删除" href="javascript:;" onclick="admin_permission_del(this,'{$ch.id}')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>
+					</td>
+				</tr>
+				{volist name="ch.child" id="chr"}
+					<tr class="text-c">
+						<td>{$chr.id}</td>
+						<td class="text-l">&nbsp;|---- {$chr.title}</td>
+						<td class="text-l">{$chr.name}</td>
+						<td>{$chr.status==1?"开启":"关闭"}</td>
+						<td>{$chr.ismenu==1?"显示":"不显示"}</td>
+						<td>
+						<a title="编辑" href="javascript:;" onclick="admin_permission_edit('权限编辑','{:url("manage/permissionAdd",array("id"=>$chr.id))}','1','','500')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6df;</i></a> 
+						<a title="删除" href="javascript:;" onclick="admin_permission_del(this,'{$chr.id}')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>
+						</td>
+					</tr>
+				{/volist}
+			{/volist}
+		{/volist}
+		</tbody>
+	</table>
+</div>
+{/block}
+{block name="js"}
+<script type="text/javascript" src="__HUI__/lib/datatables/1.10.0/jquery.dataTables.min.js"></script> 
+<script type="text/javascript">
+/*
+	参数解释：
+	title	标题
+	url		请求的url
+	id		需要操作的数据id
+	w		弹出层宽度（缺省调默认值）
+	h		弹出层高度（缺省调默认值）
+*/
+/*管理员-权限-添加*/
+function admin_permission_add(title,url,w,h){
+	layer_show(title,url,w,h);
+}
+/*管理员-权限-编辑*/
+function admin_permission_edit(title,url,id,w,h){
+	layer_show(title,url,w,h);
+}
+
+/*管理员-权限-删除*/
+function admin_permission_del(obj,id){
+	layer.confirm('确认要删除吗？',function(index){
+		$.ajax({
+			type: 'POST',
+			url: '{:url("manage/permissionDel")}',
+			dataType: 'json',
+			data:{"id":id},
+			success: function(data){
+				if(data.success==1){
+					$(obj).parents("tr").remove();
+					layer.msg(data.msg,{icon:1,time:1000});
+				}else{
+					layer.msg(data.msg,{icon:2,time:1000});
+				}				
+			},
+			error:function(data) {
+				console.log(data.msg);
+			},
+		});		
+	});
+}
+</script>
+{/block}
